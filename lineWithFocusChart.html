@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+<head>
+  <title>Epidemic Simulator</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF8">
+  <script src="js/angular.js"></script>
+  <script src="js/d3.js"></script>
+  <script src="js/nv.d3.js"></script>
+  <script src="js/angularjs-nvd3-directives.js"></script>
+  <script src="js/app.js"></script>
+  <link rel="stylesheet" href="stylesheets/nv.d3.css"/>
+  <link rel="stylesheet" href="stylesheets/bootstrap.min.css"/>
+  <link rel="stylesheet" href="stylesheets/main.css"/>
+</head>
+
+<body ng-app='nvd3EpiSim'>
+<div ng-controller="ExampleCtrl" class="container-fluid" id="wrapper" data-ng-init="generateData()">
+<div class="page-header">
+  <h1>Epidemic Simulator<small> A project at DSV</small></h1>
+</div>
+<div class="row" id="graphArea">
+  <div class="col-md-8">
+    <nvd3-line-with-focus-chart 
+      data="dataSet" 
+      id="lineGraph" 
+      height="500" width="800" height2="50" 
+      x="xAttributeFunction()" 
+      y="yAttributeFunction()" 
+      margin="{left:80,top:10,bottom:60,right:50}"
+      yaxistickformat="yAxisTickFormatFunction()" 
+      tooltips="true"
+      tooltipcontent="toolTipContentFunction()"
+      interactive="true"
+      forcey="[0]"
+      showLegend="true"
+      objectequality="false"
+      yaxislabel="People"
+      xaxislabel="Days">
+      <svg></svg>
+    </nvd3-line-with-focus-chart>
+</div>
+ <div class="col-md-3">
+   <h3 class="text-center" id="right-pane">Demographics on day {{settings.timePeriod}}</h3>
+    <nvd3-pie-chart
+            data="pieData"
+            id="pie"
+            showLabels="true"
+            x="xFunctionP()"
+            y="yFunctionP()"
+            donut="true"
+            donutRatio=".35"
+            donutLabelsOutside="true"
+            height="400" width="400"
+            tooltips="true"
+            color="colorFunction()">
+        <svg></svg>
+    </nvd3-pie-chart>
+    <nvd3-sparkline-chart
+        data="mortalities"
+        id="exampleId"
+        x="xFunction()"
+        y="yFunction()"
+        rightalignValue="true"
+        width="550"
+        height="300">
+      <svg></svg>
+    </nvd3-sparkline-chart><h4 class="text-center">Total amount of mortalities</h4>
+  </div>
+</div>
+<div id="userPane" class="row">
+    <div class="col-xs-11 col-md-5">                        
+        <h3 class="page-header" id="paneheader">Epidemic</h3>
+            <form class="form-horizontal" id="input">
+              <div class="form-group">
+                <div class="pull-left"><label for="label" class="col-xs-12 control-label">Simulation Duration</label></div>
+                <div class="col-md-5 col-xs-11 pull-right input-group">
+                  <input type="number" class="form-control" ng-model="settings.timePeriod" placeholder="Enter time duration" step="5"><span class="input-group-addon">Days</span></input>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="pull-left"><label class="control-label col-xs-12 disabled">Type of Epidemic</label></div>
+                <div class="col-md-5 col-xs-11 pull-right input-group">
+                  <select class="form-control" ng-model="settings.epidemic" ng-disabled=true>
+                      <option value="0" selected="true">SARS</option>
+                      <option value="1">MERS</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="pull-left"><label for="label" class="col-xs-12 control-label">Chance of infection</label></div>
+                <div class="col-md-5 col-xs-11 pull-right input-group">
+                  <input type="number" class="form-control" ng-model="settings.infectionRate" placeholder="Enter infection rate" step="0.0001"><span class="input-group-addon">%</span></input>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="pull-left"><label for="label" class="col-md-12 col-xs-12 control-label">Chance of contacting carrier</label></div>
+                <div class="col-md-5 col-xs-11 pull-right input-group">
+                  <input type="number" class="form-control" ng-model="settings.contactChance" placeholder="Enter chance of contact" step="0.01"><span class="input-group-addon">%</span></input>
+                </div>
+              </div>
+              <div class="form-group">
+              <div class="pull-left"><label for="label" class="col-xs-12 control-label pull-left">Mortality rate</label></div>
+                <div class="col-md-5 col-xs-11 pull-right input-group">
+                  <input type="number" class="form-control" ng-model="settings.mortalityRate" placeholder="Enter mortality rate"><span class="input-group-addon">%</span></input>
+                </div>
+              </div>
+              <div class="form-group">
+              <div class="pull-left"><label for="label" class="col-xs-12 control-label pull-left">Recovery rate</label></div>
+                <div class="col-md-5 col-xs-11 pull-right input-group">
+                  <input type="number" class="form-control" ng-model="settings.recoveryRate" placeholder="Enter recovery period"><span class="input-group-addon">Days</span></input>
+                </div>
+              </div>
+            </form>
+    </div>
+    <div class="col-xs-1"></div>
+    <div class="col-xs-11 col-md-5">
+        <h3 id="paneheader" class="page-header">Disease Demographic</h3>
+            <form class="form-horizontal" id="input2">
+              <div class="form-group">
+                <div class="pull-left"><label class="control-label col-xs-12">Total Population</label></div>
+                <div class="col-md-5 pull-right">
+                  <input type="number" class="form-control" ng-model="settings.totalPop" placeholder="Enter population size" step="100000">
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="pull-left"><label for="label" class="col-xs-12 control-label">Susceptible</label></div>
+                <div class="col-md-5 pull-right">
+                  <input type="number" class="form-control" ng-model="settings.suscPop" placeholder="Enter susceptible size" step="5000" ></input>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="pull-left"><label for="label" class="col-xs-12 control-label">Infected</label></div>
+                <div class="col-md-5 pull-right">
+                  <input type="number" class="form-control" ng-model="settings.infectPop" placeholder="Enter infected size" step="5000"></input>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="pull-left"><label for="label" class="col-xs-12 control-label">Recovered</label></div>
+                <div class="col-md-5 pull-right">
+                  <input type="number" class="form-control" ng-model="settings.recoverPop" placeholder="Enter recovered size" step="5000"></input>
+                </div>
+              </div>
+            </form>
+    </div>
+</div>       
+                
+</div>
+    
+</body>
+</html>

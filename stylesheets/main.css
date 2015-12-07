@@ -1,0 +1,30 @@
+.page-header {
+  margin-top: 0;
+}
+.disabled {
+  opacity: 0.4;
+}
+@media screen and (min-width: 768px) {
+  #wrapper div {
+    margin-left: 20px;
+  }
+  #paneheader {
+    margin-top: 10%;
+  }
+  #pie svg {
+    margin-top: -10%;
+    margin-bottom: -10%;
+    margin-left: 5%;
+  }
+}
+@media screen and (max-width: 768px) {
+  #right-pane  {
+      margin-top: 50px;
+      border-top: solid 1px;
+      padding-top: 2em;
+  }
+  #pie svg {
+    margin-top: -15%;
+    margin-bottom: -15%;
+  }
+}
